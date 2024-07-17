@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-class Class(models.Model):
+class Classroom(models.Model):
     name = models.CharField(max_length= 50)
     description = models.TextField()
     level = models.CharField(max_length= 50)

@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 
-class Class_Period(models.Model):
+class ClassPeriod(models.Model):
     starttime = models.TimeField()
     endtime = models.TimeField()
     course = models.CharField(max_length= 200)
@@ -12,7 +12,7 @@ class Class_Period(models.Model):
     duration = models.IntegerField()
     syllabus = models.TextField()
     capacity = models.IntegerField()
-    attendance = models.ManyToManyField()
+    attendance = models.IntegerField()
 
 
 def __str__(self):
