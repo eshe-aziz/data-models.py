@@ -19,6 +19,13 @@ from .serializers import ClassroomSerializer
 class StudentListView(APIView):
     def get(self, request):
         students = Student.objects.all()
+        first_name = request.query_params.get("first_name")
+        country = request.query_params.get("country")
+        if first_name:
+            students = students.filter(first_name = first_name)
+
+        if country:
+            students = students.filter(country = country)
         serializer = StudentSerializer(students, many = True)
         
         return Response(serializer.data)
@@ -58,6 +65,22 @@ class StudentDetailView(APIView):
         student = Student.objects.get(id = id)
         student.delete()
         return Response(status = status.HTTP_202_ACCEPTED)
+    
+
+    def enroll_student(self, student, course_id):
+        course = Course.objects.get(id = course_id)
+        student.course.add(course)
+
+
+    def post(self, request, id):
+        student = Student.objects.get(id = id)
+        action = request.data.get("action")
+        if action: "enroll"
+        course_id = request.data.get("course")
+        self.enroll_student(student, course_id)
+
+        return Response(status.HTTP_201_CREATED)
+
     
 # ############################################################################################################
 
@@ -159,7 +182,15 @@ class CourseListView(APIView):
         else:
             return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
         
+    def post(self, request, id):
+        student = Student.objects.get(id = id)
+        action = request.data.get("action")
+        if action: "enroll"
+        course_id = request.data.get("course")
+        self.enroll_student(student, course_id)
 
+        return Response(status.HTTP_201_CREATED)
+    
 class CourseDetailView(APIView):
     def get(self, request, id):
         course = Course.objects.get(id = id)
@@ -206,13 +237,13 @@ class ClassroomListView(APIView):
 class ClassroomDetailView(APIView):
     def get(self, request, id):
         classroom = Classroom.objects.get(id = id)
-        serializer = ClassroomSerializer(course)
+        serializer = ClassroomSerializer(classroom)
         return Response(serializer.data)
     
 
     def put(self, request, id):
         course = Classroom.objects.get(id = id)
-        serializer = ClassroomSerializer(course, data = request.data)
+        serializer = ClassroomSerializer(Classroom, data = request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
@@ -225,3 +256,21 @@ class ClassroomDetailView(APIView):
         classroom = Classroom.objects.get(id = id)
         classroom.delete()
         return Response(status = status.HTTP_202_ACCEPTED)
+    
+    
+    def add_student(self, classroom, student_id):
+        student = Student.objects.get(id = student_id)
+        student.add_(student)
+
+
+    def post(self, request, id):
+        student = Student.objects.get(id = id)
+        action = request.data.get("action")
+        if action: "enroll"
+        classroom_id = request.data.get("classroom")
+        self.add_student(student, classroom_id)
+
+        return Response(status.HTTP_201_CREATED)
+    
+
+

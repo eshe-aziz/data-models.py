@@ -1,4 +1,5 @@
 from django.db import models
+from student.models import Student
 
 # Create your models here.
 
@@ -12,7 +13,7 @@ class Classroom(models.Model):
     schedule = models.DateTimeField()
     location = models.CharField(max_length= 50)
     resources = models.TextField()
-    students = models.PositiveSmallIntegerField()
+    students = models.ManyToManyField(Student)
 
 
     def __str__(self):
