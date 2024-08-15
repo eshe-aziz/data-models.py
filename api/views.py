@@ -71,15 +71,53 @@ class StudentDetailView(APIView):
         course = Course.objects.get(id = course_id)
         student.course.add(course)
 
+    
+    def unenroll_student(self, student, course_id):
+        course = Course.objects.get(id = course_id)
+        student.course.add(course)
+
+
+    def add_to_class(self, student, course_id):
+        classroom = Classroom.objects.get(id = class_id)
+        classroom.student.add(student)
+
 
     def post(self, request, id):
         student = Student.objects.get(id = id)
         action = request.data.get("action")
-        if action: "enroll"
-        course_id = request.data.get("course")
-        self.enroll_student(student, course_id)
 
-        return Response(status.HTTP_201_CREATED)
+        if action == "enroll":
+            course_id = request.data.get("course")
+            self.enroll_student(student, course_id)
+
+            return Response(status.HTTP_201_CREATED)
+    
+
+        # elif action == "unenroll_student":
+        # course_id = request.data.get("course_id")
+        # self.unenroll_student(student, course_id)
+        # return Response(status = status.HTTP_200_OK)
+    
+        # elif action == "add_to_class":
+        #     class_id = request.data.get("class_id")
+        #     self.add_to_class(student, class_id)
+        #     return Response(status = status.HTTP_201_CREATED)
+    
+        # else:
+        # return Response(status= status.HTTP_400_BAD_REQUEST)
+
+        elif action == "unenroll_student":
+            course_id = request.data.get("course_id")
+            self.unenroll_student(student, course_id)
+            return Response(status=status.HTTP_200_OK)
+
+        elif action == "add_to_class":
+            class_id = request.data.get("class_id")
+            self.add_to_class(student, class_id)
+            return Response(status=status.HTTP_201_CREATED)
+
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     
 # ############################################################################################################
@@ -123,6 +161,44 @@ class ClassPeriodDetailView(APIView):
         classperiod.delete()
         return Response(status = status.HTTP_202_ACCEPTED)
     
+    def post(self, request, id):
+        action = request.data.get("action")
+        if action == "create_classperiod":
+            teacher_id = request.data.get("teacher_id")
+            course_id = request.data.get("course_id")
+            self.create_classperiod(teacher_id, course_id)
+            return Response(status = status.HTTP_201_CREATED)
+        
+        elif action == "get_timetable":
+            self.get_timetable(id)
+            return Response(status = status.HTTP_201_CREATED)
+        
+        else:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+        
+    def create_classperiod(self, teacher_id, course_id):
+        teacher = Teacher.objects.get(id = teacher_id)
+        course = Course.objects.get(id = course_id)
+        classperiod = ClassPeriod(teacher = teacher, course = course)
+        classperiod.save()
+        return Response(status = status.HTTP_201_CREATED)
+    
+    def get_timetable(self, request, id):
+        classperiod = ClassPeriod.objects.get(id = id)
+        timetable = []
+        for day in range(7):
+            day_timetable = []
+            for period in classperiod.periods.filter(day = day):
+                day_timetable.append({
+                    'start_time': period.start_time,
+                    'end_time': period.end_time,
+                    'course': period.course.name,
+                    'student_class': period.classroom
+                })
+
+        timetable.append(day_timetable)
+        return Response({'timetable': timetable})
+    
 
  #################################################################################################### 
 
@@ -165,6 +241,33 @@ class TeacherDetailView(APIView):
         teacher.delete()
         return Response(status = status.HTTP_202_ACCEPTED)
     
+    def assign_course(self, teacher, course_id):
+        course = Course.objects.get(id = course_id)
+        teacher.course.add(course)
+
+    def assign_class(self, teacher, class_id):
+        classroom = Classroom.objects.get(id = class_id)
+        classroom.teacher = teacher
+        classroom.save()
+
+    
+    def post(self, request, id):
+        teacher = Teacher.objects.get(id = id)
+        action = request.data.get("action")
+
+        if action == "assign_course":
+            course_id = request.data.get("course_id")
+            self.assign_course(teacher, course_id)
+            return Response(status = status.HTTP_201_CREATED)
+        
+        elif action == "assign_class":
+            class_id = request.data.get("class_id")
+            self.assign_class(teacher, class_id)
+            return Response(status = status.HTTP_201_CREATED)
+        
+        else:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+        
 #########################################################################################################
 class CourseListView(APIView):
     def get(self, request): 
@@ -173,7 +276,7 @@ class CourseListView(APIView):
         
         return Response(serializer.data)
     
-    def post(self, request):
+    def put(self, request): #it was post before
         serializer = CourseSerializer(data =request.data)
         if serializer.is_valid():
             serializer.save()
@@ -242,8 +345,8 @@ class ClassroomDetailView(APIView):
     
 
     def put(self, request, id):
-        course = Classroom.objects.get(id = id)
-        serializer = ClassroomSerializer(Classroom, data = request.data)
+        classroom = Classroom.objects.get(id = id)
+        serializer = ClassroomSerializer(classroom, data = request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
@@ -256,21 +359,6 @@ class ClassroomDetailView(APIView):
         classroom = Classroom.objects.get(id = id)
         classroom.delete()
         return Response(status = status.HTTP_202_ACCEPTED)
-    
-    
-    def add_student(self, classroom, student_id):
-        student = Student.objects.get(id = student_id)
-        student.add_(student)
-
-
-    def post(self, request, id):
-        student = Student.objects.get(id = id)
-        action = request.data.get("action")
-        if action: "enroll"
-        classroom_id = request.data.get("classroom")
-        self.add_student(student, classroom_id)
-
-        return Response(status.HTTP_201_CREATED)
     
 
 
