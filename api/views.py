@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from student.models import Student
 from .serializers import StudentSerializer
+from .serializers import MinimalStudentSerializer
 from rest_framework.response import Response
 from classperiod.models import ClassPeriod
 from .serializers import ClassPeriodSerializer
@@ -26,7 +27,8 @@ class StudentListView(APIView):
 
         if country:
             students = students.filter(country = country)
-        serializer = StudentSerializer(students, many = True)
+        # serializer = StudentSerializer(students, many = True)
+        serializer = MinimalStudentSerializer(students, many = True)
         
         return Response(serializer.data)
     
@@ -77,7 +79,7 @@ class StudentDetailView(APIView):
         student.course.add(course)
 
 
-    def add_to_class(self, student, course_id):
+    def add_to_class(self, student, class_id):
         classroom = Classroom.objects.get(id = class_id)
         classroom.student.add(student)
 
