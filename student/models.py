@@ -6,7 +6,7 @@ from course.models import Course
 class Student(models.Model):
     first_name = models.CharField(max_length= 20)
     last_name = models.CharField(max_length= 20)
-    gender = models.CharField(max_length= 20, default='default_gender_value')
+    gender = models.CharField(max_length= 20)
     email = models.EmailField()
     country = models.CharField(max_length= 20)
     date_of_birth = models.DateField()
