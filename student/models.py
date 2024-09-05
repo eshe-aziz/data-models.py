@@ -12,8 +12,8 @@ class Student(models.Model):
     date_of_birth = models.DateField()
     code = models.PositiveSmallIntegerField()
     course = models.ManyToManyField(Course)
-    bio = models.CharField(max_length = 50, default='default_bio_value')
-    guardian_name = models.CharField(max_length = 50, default='default_guardian_name_value')
+    bio = models.CharField(max_length = 50)
+    guardian_name = models.CharField(max_length = 50)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

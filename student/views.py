@@ -1,9 +1,33 @@
-from django.shortcuts import render
+# from django.shortcuts import render, redirect
+# from .forms import StudentRegistrationForm
+
+# # Create your views here.
+# def register_student(request): #request- represents the HTTP request
+#     if request.method == "POST":
+#         form = StudentRegistrationForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             redirect("register_student")
+
+#         else:
+#             form = StudentRegistrationForm()
+
+#         return render(request, "student/register_student.html", {"form": form})
+
+
+
+from django.shortcuts import render, redirect
 from .forms import StudentRegistrationForm
 
 # Create your views here.
-def register_student(request): #request- represents the HTTP request
-    form = StudentRegistrationForm()
+def register_student(request):
+    if request.method == "POST":
+        form = StudentRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("register_student")  # This needs to be followed by `return` to stop further execution
 
-    return render(request, "student/register_student.html", #name of the template we are going to create to be able to render
-    {"form": form})
+    else:
+        form = StudentRegistrationForm()
+
+    return render(request, "student/register_student.html", {"form": form})
